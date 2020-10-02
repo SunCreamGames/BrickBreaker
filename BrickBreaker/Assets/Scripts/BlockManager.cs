@@ -30,7 +30,7 @@ public class BlockManager : MonoBehaviour
             Vector2 pos = new Vector2((float)Convert.ToDouble(arguments[3]),(float)Convert.ToDouble(arguments[4]));
             blocks.Add(CreateBlock(w, h, r, pos));
         } while (s != "");
-
+        GetComponent<CollisionManager>().SetBlocks(blocks);
     }
 
     Block CreateBlock(float w, float h, float r, Vector2 pos)

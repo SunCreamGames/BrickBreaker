@@ -7,84 +7,123 @@ public class CollisionManager : MonoBehaviour
     [SerializeField]
     Ball ball;
     List<Block> blocks;
-    void Start()
+    public void SetBlocks(List<Block> blocks)
     {
-        blocks = FindObjectOfType<BlockManager>().blocks;
+        this.blocks = blocks;
     }
-
-    // Update is called once per frame
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.yellow;
+    //    foreach (Block block in blocks)
+    //    {
+    //        foreach (Vector2 vert in block.verts)
+    //        {
+    //            Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);  
+    //        }
+    //        for (int i = 0; i < block.verts.Length; i++)
+    //        {
+    //            Gizmos.DrawLine(new Vector3(block.verts[i % 4].x, block.verts[i % 4].y, 0f),
+    //                new Vector3(block.verts[(i + 1) % 4].x, block.verts[(i + 1) % 4].y, 0f));
+    //        }
+    //    }
+    //}
     void FixedUpdate()
     {
         foreach (Block block in blocks)
         {
-            foreach (float[] edge in block.edges)
-            {
-                CheckForCollision(ball.transform.position, ball.radius, edge);
-            }
-        }
-    }
-    void CheckForCollision(Vector2 pos, float r, float[] edge)
-    {
-        if (pos.x + r < edge[3] || pos.x - r > edge[4])
-        {
-            return;
-        }
+            int i;
 
-        float a = edge[0];
-        float b = edge[1];
-        float c = edge[2];
-        float p = pos.x;
-        float q = pos.y;
-
-        float D = 4 * (a * c - p * b * b + a * b) * (a * c - p * b * b + a * b)
-            - 4 * (b * b + a * a) * (c * c + 2 * b * c * q + q * q * b * b + p * p * b * b - r * r * b * b);
-        // Discriminant
-        if (D < 0)
-        {
-            return;
-        }
-        else if (D == 0)
-        {
-            float x = (2 * (p * b * b - a * c - a * b) - Mathf.Sqrt(D)) / 2 * b * b * a * a;
-
-            if (x > edge[3] && x < edge[4])
+            if (Mathf.Abs(ball.Velocity.x) >= Mathf.Abs(ball.Velocity.y))
             {
-                float x1 = (2 * (p * b * b - a * c - a * b) - Mathf.Sqrt(D)) / 2 * b * b * a * a;
-                Vector2 touchPoint = new Vector2(x1, (edge[0] * x1 - edge[2]) / edge[1]);
-                ball.SetVelocity(Reflect(touchPoint, edge, ball.velocity));
-            }
-        }
-        else
-        {
-            float x1 = (2 * (p * b * b - a * c - a * b) - Mathf.Sqrt(D)) / 2 * b * b * a * a;
-            float x2 = (2 * (p * b * b - a * c - a * b) + Mathf.Sqrt(D)) / 2 * b * b * a * a;
-            if (x1 > edge[3] && x1 < edge[4])
-            {
-                if (x2 > edge[3] && x2 < edge[4])
+                if (ball.transform.position.x > block.pos.x)
                 {
-                    Vector2 touchPoint1 = new Vector2(x1, (edge[0] * x1 - edge[2]) / edge[1]);
-                    Vector2 touchPoint2 = new Vector2(x2, (edge[0] * x2 - edge[2]) / edge[1]);
-                    ball.SetVelocity(Reflect(LinAl.Midle(touchPoint1, touchPoint2), edge, ball.velocity));
+                    i = 1;
                 }
                 else
                 {
-                    Vector2 touchPoint = new Vector2(x1, (edge[0] * x1 - edge[2]) / edge[1]);
-                    ball.SetVelocity(Reflect(touchPoint, edge, ball.velocity));
+                    i = 3;
                 }
             }
             else
             {
-                if (x2 > edge[3] && x2 < edge[4])
+                if (ball.transform.position.y > block.pos.y)
                 {
-                    Vector2 touchPoint = new Vector2(x2, (edge[0] * x2 - edge[2]) / edge[1]);
-                    ball.SetVelocity(Reflect(touchPoint, edge, ball.velocity));
+                    i = 0;
                 }
+                else
+                {
+                    i = 2;
+                }
+            }
+            for (; i < 3 + i; i++)
+            {
+                bool a = CheckForCollision(ball.transform.position, ball.radius, block.edges[i % 4]);
+                if (a)
+                {
+                    break;
+                }
+            }
+        }
+    }
+    
+    bool CheckForCollision(Vector2 pos, float r, Edge edge)
+    {
+        if (pos.x + r < Mathf.Min(edge.V2.x,edge.V1.x) ||
+            pos.x - r > Mathf.Max(edge.V2.x, edge.V1.x) ||
+            pos.y + r < Mathf.Min(edge.V2.y, edge.V1.y) ||
+            pos.y - r > Mathf.Max(edge.V2.y, edge.V1.y))
+        {
+            return false;
+        }
+
+        float a = edge.Line[0];
+        float b = edge.Line[1];
+        float c = edge.Line[2];
+        float p = pos.x;
+        float q = pos.y;
+
+        float A = 1 + (a / b) * (a / b);
+        float B = 2 * a * c / (b * b) - 2 * p + a * q / b;
+        float C = p * p + (c / b) * (c / b) + 2 * q * c / b + q * q - r * r;
+
+        float D = B * B - 4 * A * C; // Discriminant
+        if (D < 0)
+        {
+            Debug.Log("Nihuya");
+            return false;
+        }
+        else /*if (D >= 0)*/
+        {
+            Debug.Log(edge.rotation);
+            if (edge.rotation == Edge.Rotation.Horizontal)
+            {
+                ball.SetVelocity(new Vector2(ball.Velocity.x, -ball.Velocity.y));
+                ball.transform.position =
+                      (ball.transform.position.y > edge.V2.y) ?
+                      new Vector3(ball.transform.position.x, edge.V2.y + r + 0.0001f, ball.transform.position.z) :
+                      new Vector3(ball.transform.position.x,edge.V2.y - r - 0.0001f, ball.transform.position.z);
+                return true;
+            }
+            else if (edge.rotation == Edge.Rotation.Vertical)
+            {
+                ball.SetVelocity(new Vector2(-ball.Velocity.x, ball.Velocity.y));
+                ball.transform.position =
+                    (ball.transform.position.x>edge.V2.x) ? 
+                    new Vector3(edge.V2.x + r + 0.0001f,ball.transform.position.y, ball.transform.position.z):
+                    new Vector3(edge.V2.x - r - 0.0001f, ball.transform.position.y, ball.transform.position.z);
+                return true;
+            }
+            else
+            {
+                float x = -(B + Mathf.Sqrt(D)) / (2 * A);
+                return true;
             }
         }
     }
 
     Vector2 Reflect(Vector2 touch, float[] wall, Vector2 velocity)
     {
+        Debug.LogWarning($"Reflect on ({touch.x};{touch.y})");
         if (wall[1] == 0)
         {
             velocity.x *= -1;

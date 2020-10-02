@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    public Vector2 velocity { private set; get; }
+    public Vector2 Velocity { private set; get; }
     public float radius { private set; get; }
     [SerializeField]
     float speed;
@@ -12,38 +12,37 @@ public class Ball : MonoBehaviour
     Vector2 leftBottomCorner, rightUpCorner;
     public void SetVelocity(Vector2 vel)
     {
-        velocity = vel;
+        Velocity = vel;
     }
     void Start()
     {
         leftBottomCorner = Camera.main.ScreenToWorldPoint(Vector3.zero);
         rightUpCorner = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
         prevPos = transform.position;
-        velocity = new Vector2 (Random.Range(-0.8f, 0.8f), Random.Range(0, 1f));
-        velocity.Normalize();
-        velocity *= speed;
+        Velocity = new Vector2 (Random.Range(-0.8f, 0.8f), Random.Range(0, 1f));
+        Velocity = Velocity.normalized * speed;
         radius = 0.15f;
     }
     void Update()
     {
         if (transform.position.x - radius <= leftBottomCorner.x)
         {
-            velocity = new Vector2(-velocity.x, velocity.y);
+            Velocity = new Vector2(-Velocity.x, Velocity.y);
             transform.position = new Vector3(leftBottomCorner.x + radius, transform.position.y, transform.position.z);
         }
         else if (transform.position.x + radius>= rightUpCorner.x)
         {
-            velocity = new Vector2(-velocity.x, velocity.y);
+            Velocity = new Vector2(-Velocity.x, Velocity.y);
             transform.position = new Vector3(rightUpCorner.x - radius, transform.position.y, transform.position.z);
         }
         if (transform.position.y - radius <= leftBottomCorner.y)
         {
-            velocity = new Vector2(velocity.x, -velocity.y);
+            Velocity = new Vector2(Velocity.x, -Velocity.y);
             transform.position = new Vector3(transform.position.x, leftBottomCorner.y + radius, transform.position.z);
         }
         else if (transform.position.y + radius >= rightUpCorner.y)
         {
-            velocity = new Vector2(velocity.x, -velocity.y);
+            Velocity = new Vector2(Velocity.x, -Velocity.y);
             transform.position = new Vector3(transform.position.x, rightUpCorner.y - radius, transform.position.z);
         }
     }    
@@ -52,8 +51,8 @@ public class Ball : MonoBehaviour
     {
         prevPos = transform.position;
         transform.position = new Vector3(
-            transform.position.x + velocity.x * Time.deltaTime,
-            transform.position.y + velocity.y * Time.deltaTime,
+            transform.position.x + Velocity.x * Time.deltaTime,
+            transform.position.y + Velocity.y * Time.deltaTime,
             transform.position.z);
     }
    

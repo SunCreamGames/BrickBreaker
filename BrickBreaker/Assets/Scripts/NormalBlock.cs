@@ -11,21 +11,19 @@ public class NormalBlock : Block
         verts[1] = pos + new Vector2(w / 2, h / 2);
         verts[2] = pos + new Vector2(w / 2, -h / 2);
         verts[3] = pos + new Vector2(-w / 2, -h / 2);
+        foreach (var item in verts)
+        {
+            Debug.Log(item.x + " ::: " + item.y);
+        }
         return verts;
     }
-    public override float[][] SetEdges()
+    public override Edge[] SetEdges()
     {
-        float[][] edges = new float[4][];
+        edges = new Edge[4];
         for (int i = 0; i < 4; i++)
         {
-            edges[i] = new float[5];
-            float[] newEdge = LinAl.GetLine(verts[i], verts[(i + 1) % 4]);
-            for (int k = 0; k < 3; k++)
-            {
-                edges[i][k] = newEdge[k];
-            }
-            edges[i][3] = Mathf.Min(verts[i].x, verts[(i + 1) % 4].x);
-            edges[i][4] = Mathf.Max(verts[i].x, verts[(i + 1) % 4].x);
+            edges[i] = new Edge(verts[i], verts[(i + 1) % 4]);
+            Debug.DrawLine(edges[i].V1, edges[i].V2, Color.red, 15f);
         }
         return edges;
     }
@@ -91,17 +89,10 @@ public class NormalBlock : Block
             }
         }
     }
-    override public bool CheckForCollision(Vector2 pos)
+
+    public NormalBlock(float w, float h, float rot, Vector2 pos, GameObject block)
     {
-        if (pos.x < verts[1].x && pos.y < verts[1].y && pos.x > verts[3].x && pos.y > verts[3].y)
-        {
-            return true;
-        }
-        return false;
-    }
-    public NormalBlock(float w, float h, float rot, /*float ballRadius*/ Vector2 pos, GameObject block)
-    {
-        GameObject visualPart = Instantiate(block);
+        GameObject visualPart = GameObject.Instantiate(block);
         visualPart.transform.rotation = Quaternion.Euler(0, 0, rot);
         visualPart.transform.localScale = new Vector3(w, h, 1f);
         visualPart.transform.position = pos;

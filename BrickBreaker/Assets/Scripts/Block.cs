@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Block : MonoBehaviour
+public abstract class Block
 {
     protected float w, h, rotation;
-    protected Vector2 pos;
+    public Vector2 pos;
     public Vector2[] verts;
-    public float[][] edges { private set; get; }
+    public Edge[] edges;
     public virtual Vector2[] SetVerticies()
     {
         return null;
     }
-    public virtual float[][] SetEdges()
+    public virtual Edge[] SetEdges()
     {
         return null;
     }
