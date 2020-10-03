@@ -28,6 +28,7 @@ public class BlockManager : MonoBehaviour
             float h = (float)Convert.ToDouble(arguments[1]);
             float r = (float)Convert.ToDouble(arguments[2]);
             Vector2 pos = new Vector2((float)Convert.ToDouble(arguments[3]),(float)Convert.ToDouble(arguments[4]));
+            Debug.LogError(w + " " + h + " " + r + " " + pos.x + " " + pos.y);
             blocks.Add(CreateBlock(w, h, r, pos));
         } while (s != "");
         GetComponent<CollisionManager>().SetBlocks(blocks);
@@ -43,6 +44,7 @@ public class BlockManager : MonoBehaviour
         }
         if(r == 90f || r == 0f)
         {
+            Debug.Log("Normal ++");
             return new NormalBlock(w,h,r,pos, visualBlock);
         }
         else

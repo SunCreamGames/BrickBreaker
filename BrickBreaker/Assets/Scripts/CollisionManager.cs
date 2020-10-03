@@ -18,7 +18,7 @@ public class CollisionManager : MonoBehaviour
     //    {
     //        foreach (Vector2 vert in block.verts)
     //        {
-    //            Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);  
+    //            Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);
     //        }
     //        for (int i = 0; i < block.verts.Length; i++)
     //        {
@@ -29,40 +29,57 @@ public class CollisionManager : MonoBehaviour
     //}
     void FixedUpdate()
     {
+
         foreach (Block block in blocks)
         {
-            int i;
 
-            if (Mathf.Abs(ball.Velocity.x) >= Mathf.Abs(ball.Velocity.y))
+            //--------------------------------------------------------------------------------------------------//
+
+            // Need to fix doubleReflect. Velocityvector doesn't  help. Maybe I should use shortest normal, idk.//
+            
+            //--------------------------------------------------------------------------------------------------//
+
+
+            //if (Mathf.Abs(ball.Velocity.x) >= Mathf.Abs(ball.Velocity.y))
+            //{
+            //    if (ball.transform.position.x > block.pos.x)
+            //    {
+            //        Edge e = block.edges[1];
+            //        block.edges[1] = block.edges[0];
+            //        block.edges[0] = e;
+            //    }
+            //    else
+            //    {
+            //        Edge e = block.edges[3];
+            //        block.edges[3] = block.edges[2];
+            //        block.edges[2] = block.edges[1];
+            //        block.edges[1] = block.edges[0];
+            //        block.edges[0] = e;
+            //    }
+            //}
+            //else
+            //{
+            //    if (ball.transform.position.y > block.pos.y)
+            //    {
+
+            //    }
+            //    else
+            //    {
+            //        Edge e = block.edges[2];
+            //        block.edges[2] = block.edges[1];
+            //        block.edges[1] = block.edges[0];
+            //        block.edges[0] = e;
+            //    }
+            //}
+            foreach (Edge edge in block.edges)
             {
-                if (ball.transform.position.x > block.pos.x)
-                {
-                    i = 1;
-                }
-                else
-                {
-                    i = 3;
-                }
-            }
-            else
-            {
-                if (ball.transform.position.y > block.pos.y)
-                {
-                    i = 0;
-                }
-                else
-                {
-                    i = 2;
-                }
-            }
-            for (; i < 3 + i; i++)
-            {
-                bool a = CheckForCollision(ball.transform.position, ball.radius, block.edges[i % 4]);
+                bool a = CheckForCollision(ball.transform.position, ball.radius, /*block*/edge);
                 if (a)
                 {
                     break;
                 }
             }
+           
         }
     }
     
