@@ -36,15 +36,16 @@ public class BlockManager : MonoBehaviour
 
     Block CreateBlock(float w, float h, float r, Vector2 pos)
     {
-        if (r > 90f)
+        r %= 180f; 
+        if (r >= 90f)
         {
             r -= 90f;
             float tmp = w;
-            w = h; h = w;
+            w = h;
+            h = tmp;
         }
-        if(r == 90f || r == 0f)
+        if(r == 0f)
         {
-            Debug.Log("Normal ++");
             return new NormalBlock(w,h,r,pos, visualBlock);
         }
         else

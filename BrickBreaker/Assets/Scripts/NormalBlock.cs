@@ -23,6 +23,14 @@ public class NormalBlock : Block
         for (int i = 0; i < 4; i++)
         {
             edges[i] = new Edge(verts[i], verts[(i + 1) % 4]);
+            if (edges[i].rotation == Edge.Rotation.Vertical)
+            {
+                edges[i].isRightUp = this.pos.x < edges[i].V1.x;
+            }
+            else
+            {
+                edges[i].isRightUp = !LinAl.isPointUpperThanLine(this.pos, edges[i].V1, edges[i].V2);
+            }
             Debug.DrawLine(edges[i].V1, edges[i].V2, Color.white, 15f);
         }
         return edges;

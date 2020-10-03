@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,22 +12,22 @@ public class CollisionManager : MonoBehaviour
     {
         this.blocks = blocks;
     }
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.color = Color.yellow;
-    //    foreach (Block block in blocks)
-    //    {
-    //        foreach (Vector2 vert in block.verts)
-    //        {
-    //            Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);
-    //        }
-    //        for (int i = 0; i < block.verts.Length; i++)
-    //        {
-    //            Gizmos.DrawLine(new Vector3(block.verts[i % 4].x, block.verts[i % 4].y, 0f),
-    //                new Vector3(block.verts[(i + 1) % 4].x, block.verts[(i + 1) % 4].y, 0f));
-    //        }
-    //    }
-    //}
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        foreach (Block block in blocks)
+        {
+            foreach (Vector2 vert in block.verts)
+            {
+                Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);
+            }
+            for (int i = 0; i < block.verts.Length; i++)
+            {
+                Gizmos.DrawLine(new Vector3(block.verts[i % 4].x, block.verts[i % 4].y, 0f),
+                    new Vector3(block.verts[(i + 1) % 4].x, block.verts[(i + 1) % 4].y, 0f));
+            }
+        }
+    }
     void FixedUpdate()
     {
 
@@ -36,7 +37,7 @@ public class CollisionManager : MonoBehaviour
             //--------------------------------------------------------------------------------------------------//
 
             // Need to fix doubleReflect. Velocityvector doesn't  help. Maybe I should use shortest normal, idk.//
-            
+
             //--------------------------------------------------------------------------------------------------//
 
 
@@ -92,7 +93,18 @@ public class CollisionManager : MonoBehaviour
         {
             return false;
         }
-
+        if ((edge.rotation != Edge.Rotation.Vertical)&&(edge.isRightUp && !LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2))||
+            (!edge.isRightUp && LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)))
+        {
+            return false;
+        }
+        if (edge.rotation == Edge.Rotation.Vertical)
+        {
+            if(pos.x<edge.V1.x&& edge.isRightUp || (pos.x > edge.V1.x && !edge.isRightUp))
+            {
+                return false;
+            }
+        }
         float a = edge.Line[0];
         float b = edge.Line[1];
         float c = edge.Line[2];
@@ -111,7 +123,6 @@ public class CollisionManager : MonoBehaviour
         }
         else /*if (D >= 0)*/
         {
-            Debug.Log(edge.rotation);
             if (edge.rotation == Edge.Rotation.Horizontal)
             {
                 ball.SetVelocity(new Vector2(ball.Velocity.x, -ball.Velocity.y));
@@ -132,33 +143,27 @@ public class CollisionManager : MonoBehaviour
             }
             else
             {
+                Debug.Log("OOOO");
                 float x = -(B + Mathf.Sqrt(D)) / (2 * A);
+                float y = (x * A + C)/ -B;
+
+                ball.SetVelocity(Reflect(new Vector2(x,y), edge, ball.Velocity));
                 return true;
             }
         }
     }
 
-    Vector2 Reflect(Vector2 touch, float[] wall, Vector2 velocity)
+    Vector2 Reflect(Vector2 touch, Edge wall, Vector2 velocity)
     {
-        Debug.LogWarning($"Reflect on ({touch.x};{touch.y})");
-        if (wall[1] == 0)
-        {
-            velocity.x *= -1;
-            return velocity;
-        }
-        if (wall[0] == 0)
-        {
-            velocity.y *= -1;
-            return velocity;
-        }
+       
         float speeed = velocity.magnitude;
 
-        float k1 = -wall[0] / wall[1];
+        float k1 = -wall.Line[0] / wall.Line[1];
         float WallAngle = Mathf.Atan(k1) * Mathf.Rad2Deg;
         float VelocityAngle = Mathf.Atan2(velocity.y,velocity.x) * Mathf.Rad2Deg;
         float newVelocityAngle = 2 * WallAngle - VelocityAngle;
 
-        velocity = new Vector2(1, Mathf.Tan(Mathf.Deg2Rad * newVelocityAngle)).normalized * speeed;
+        velocity = new Vector2(Mathf.Tan(Mathf.Deg2Rad * newVelocityAngle), 1f).normalized * speeed;
         return velocity;
     }
 }

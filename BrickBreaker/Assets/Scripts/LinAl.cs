@@ -68,4 +68,44 @@ public class LinAl
         line[2] = v1.y * v2.x - v2.y * v1.x;
         return line;
     }
+
+    public static float[] GetPerpendicularLine(Vector2 point, float[] basicLine)
+    {
+        float[] perpendLine = new float[3];
+        if (basicLine[0] == 0)
+        {
+            float y = -basicLine[2] / basicLine[1];
+            Vector2 crossPerpendAndBasic = new Vector2(point.x, y);
+            return GetLine(point, crossPerpendAndBasic);
+        }
+        else if (basicLine[1] == 0)
+        {
+            float x = -basicLine[2] / basicLine[0];
+            Vector2 crossPerpendAndBasic = new Vector2(x, point.y);
+            return GetLine(point, crossPerpendAndBasic);
+        }
+        else
+        {
+            perpendLine[0] = -basicLine[1] / basicLine[0]; //   -k from y = kx + b 
+            perpendLine[2] = -(point.y - perpendLine[0] * point.x); // -b from y = kx + b
+            perpendLine[1] = 1;
+            // ax+by+c = 0 <=> kx + 1y + b = 0
+            return perpendLine;
+        }
+    }
+    public static float GetDistance(Vector2 point, Edge edge)
+    {
+        float[] basicLine = edge.Line;
+        float[] perpendLine = GetPerpendicularLine(point, basicLine);
+        Vector2 crossPerpendAndBasic = CrossOfTheLines(perpendLine, basicLine);
+        if (crossPerpendAndBasic.x < Mathf.Max(edge.V2.x, edge.V1.x) && crossPerpendAndBasic.x > Mathf.Min(edge.V2.x, edge.V1.x) &&
+            crossPerpendAndBasic.y < Mathf.Max(edge.V2.y, edge.V1.y) && crossPerpendAndBasic.y > Mathf.Min(edge.V2.y, edge.V1.y))
+        {
+            return (point - crossPerpendAndBasic).magnitude;
+        }
+        else
+        {
+            return (point - crossPerpendAndBasic).magnitude * 100f;
+        }
+    }
 }
