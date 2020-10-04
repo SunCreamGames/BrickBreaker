@@ -69,6 +69,39 @@ public class LinAl
         return line;
     }
 
+    public static Vector2 GetNormalToEdge(Edge edge)
+    {
+        float[] perpendicularLine = GetPerpendicularLine(edge.V1, edge.Line);
+        perpendicularLine[2] = 0;
+
+        float x1 = -1;
+        float x2 = 1;
+        float y1 = perpendicularLine[0] * x1 / -perpendicularLine[1];
+        float y2 = perpendicularLine[0] * x2 / -perpendicularLine[1];
+        if (edge.isRightUp)
+        {
+            if (y1 > y2)
+            {
+                return new Vector2(x1, y1).normalized;
+            }
+            else
+            {
+                return new Vector2(x2, y2).normalized;
+            }
+        }
+        else
+        {
+            if (y1 < y2)
+            {
+                return new Vector2(x1, y1).normalized;
+            }
+            else
+            {
+                return new Vector2(x2, y2).normalized;
+            }
+        }
+
+    }
     public static float[] GetPerpendicularLine(Vector2 point, float[] basicLine)
     {
         float[] perpendLine = new float[3];

@@ -115,14 +115,20 @@ public class CollisionManager : MonoBehaviour
             }
             else
             {
-                float y = -(B + Mathf.Sqrt(D)) / (2 * A);
-                float x = (y * b + c)/ -a;
+                float y1 = -(B + Mathf.Sqrt(D)) / (2 * A);
+                float x1 = (y1 * b + c)/ -a;
+                float y2 = -(B - Mathf.Sqrt(D)) / (2 * A);
+                float x2 = (y2 * b + c)/ -a;
+                float y = y1 + (y2 - y1) / 2;
+                float x = x1 + (x2 - x1) / 2;
                 if ((edge.isRightUp && !LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)) ||
                     (!edge.isRightUp && LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)))
                 {
                     return false;
                 }
                 ball.SetVelocity(Reflect(new Vector2(x,y), edge, ball.Velocity));
+
+                ball.transform.position = new Vector2(x, y) + LinAl.GetNormalToEdge(edge)/* ball.Velocity.normalized */* (r + 0.001f);
                 return true;
             }
         }
