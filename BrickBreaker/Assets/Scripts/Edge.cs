@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Edge : IComparable
+public class Edge
 {
     public enum Rotation
     {
@@ -32,18 +32,5 @@ public class Edge : IComparable
         V1 = v1;
         V2 = v2;
         Line = LinAl.GetLine(v1, v2);
-    }
-
-    public int CompareTo(object obj)
-    {
-        Edge edge = obj as Edge;
-        if (LinAl.GetDistance(ballPos, this) < LinAl.GetDistance(ballPos, edge))
-        {
-            return -1;
-        }
-        else
-        {
-            return 1;
-        }
     }
 }

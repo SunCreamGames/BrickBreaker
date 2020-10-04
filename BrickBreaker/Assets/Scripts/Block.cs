@@ -16,18 +16,10 @@ public abstract class Block
     {
         return null;
     }
-    public virtual bool CheckForCollision(Vector2 pos)
-    {
-        return false;
-    }
+  
     public virtual void GetReflectData(out LinAl.Reflect reflect, out Vector2 pointOfReflect, Vector2 pos, Vector2 prevPos)
     {
         reflect = LinAl.Reflect.Diagonal;
-        pointOfReflect = Vector2.zero;
-    }
-    public virtual void GetReflectData(out float[] line, out Vector2 pointOfReflect, Vector2 pos, Vector2 prevPos)
-    {
-        line = new float[3];
         pointOfReflect = Vector2.zero;
     }
 }

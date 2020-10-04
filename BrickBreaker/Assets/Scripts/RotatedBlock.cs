@@ -10,7 +10,8 @@ public class RotatedBlock : Block
         for (int i = 0; i < 4; i++)
         {
             edges[i] = new Edge(verts[i], verts[(i + 1) % 4]);
-            Debug.DrawLine(edges[i].V1, edges[i].V2, Color.white, 15f);
+            edges[i].isRightUp = !LinAl.isPointUpperThanLine(this.pos, edges[i].V1, edges[i].V2);
+            
         }
         return edges;
     }
@@ -56,69 +57,6 @@ public class RotatedBlock : Block
         }
         verts = verts1;
         return verts1;
-    }
-    override public bool CheckForCollision(Vector2 pos)
-    {
-        if (!(pos.x > verts[2].x || pos.x < verts[0].x ||
-             pos.y < verts[3].y || pos.y > verts[1].y))
-            return false;
-        else
-        {
-            if (pos.x < verts[1].x && pos.x < verts[3].x)
-            {
-                if (!LinAl.isPointUpperThanLine(pos, verts[0], verts[1]) && LinAl.isPointUpperThanLine(pos, verts[3], verts[0]))
-                {
-                    return true;
-                }
-            }
-            if (pos.x < verts[1].x && pos.x > verts[3].x)
-            {
-                if (!LinAl.isPointUpperThanLine(pos, verts[0], verts[1]) && LinAl.isPointUpperThanLine(pos, verts[2], verts[3]))
-                {
-                    return true;
-                }
-            }
-            if (pos.x > verts[1].x && pos.x > verts[3].x)
-            {
-                if (!LinAl.isPointUpperThanLine(pos, verts[1], verts[2]) && LinAl.isPointUpperThanLine(pos, verts[3], verts[0]))
-                {
-                    return true;
-                }
-            }
-
-            if (pos.x > verts[1].x && pos.x < verts[3].x)
-            {
-                if (!LinAl.isPointUpperThanLine(pos, verts[1], verts[2]) && LinAl.isPointUpperThanLine(pos, verts[2], verts[3]))
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    override public void GetReflectData(out float[] line, out Vector2 pointOfReflect, Vector2 pos, Vector2 prevPos)
-    {
-        float[] wall, velocityDirectionLine;
-        velocityDirectionLine = LinAl.GetLine(pos, prevPos);
-        if (prevPos.x < verts[1].x && prevPos.y>verts[0].y)
-        {
-            wall = LinAl.GetLine(verts[0], verts[1]);
-        }
-        else if (prevPos.x > verts[1].x && prevPos.y>verts[0].y)
-        {
-            wall = LinAl.GetLine(verts[1], verts[2]);
-        }
-        else if (prevPos.x > verts[3].x && prevPos.y<verts[2].y)
-        {
-            wall = LinAl.GetLine(verts[2], verts[3]);
-        }
-        else
-        {
-            wall = LinAl.GetLine(verts[0], verts[3]);
-        }
-        pointOfReflect = LinAl.CrossOfTheLines(wall, velocityDirectionLine);
-        line = wall; 
     }
     public RotatedBlock(float w, float h, float rot, Vector2 pos, GameObject block)
     {

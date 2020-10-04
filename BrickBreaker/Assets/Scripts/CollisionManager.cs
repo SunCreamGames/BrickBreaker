@@ -12,73 +12,35 @@ public class CollisionManager : MonoBehaviour
     {
         this.blocks = blocks;
     }
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        foreach (Block block in blocks)
-        {
-            foreach (Vector2 vert in block.verts)
-            {
-                Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);
-            }
-            for (int i = 0; i < block.verts.Length; i++)
-            {
-                Gizmos.DrawLine(new Vector3(block.verts[i % 4].x, block.verts[i % 4].y, 0f),
-                    new Vector3(block.verts[(i + 1) % 4].x, block.verts[(i + 1) % 4].y, 0f));
-            }
-        }
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.color = Color.yellow;
+    //    foreach (Block block in blocks)
+    //    {
+    //        foreach (Vector2 vert in block.verts)
+    //        {
+    //            Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);
+    //        }
+    //        for (int i = 0; i < block.verts.Length; i++)
+    //        {
+    //            Gizmos.DrawLine(new Vector3(block.verts[i % 4].x, block.verts[i % 4].y, 0f),
+    //                new Vector3(block.verts[(i + 1) % 4].x, block.verts[(i + 1) % 4].y, 0f));
+    //        }
+    //    }
+    //}
     void FixedUpdate()
     {
-
         foreach (Block block in blocks)
         {
-
-            //--------------------------------------------------------------------------------------------------//
-
-            // Need to fix doubleReflect. Velocityvector doesn't  help. Maybe I should use shortest normal, idk.//
-
-            //--------------------------------------------------------------------------------------------------//
-
-
-            //if (Mathf.Abs(ball.Velocity.x) >= Mathf.Abs(ball.Velocity.y))
-            //{
-            //    if (ball.transform.position.x > block.pos.x)
-            //    {
-            //        Edge e = block.edges[1];
-            //        block.edges[1] = block.edges[0];
-            //        block.edges[0] = e;
-            //    }
-            //    else
-            //    {
-            //        Edge e = block.edges[3];
-            //        block.edges[3] = block.edges[2];
-            //        block.edges[2] = block.edges[1];
-            //        block.edges[1] = block.edges[0];
-            //        block.edges[0] = e;
-            //    }
-            //}
-            //else
-            //{
-            //    if (ball.transform.position.y > block.pos.y)
-            //    {
-
-            //    }
-            //    else
-            //    {
-            //        Edge e = block.edges[2];
-            //        block.edges[2] = block.edges[1];
-            //        block.edges[1] = block.edges[0];
-            //        block.edges[0] = e;
-            //    }
-            //}
             foreach (Edge edge in block.edges)
             {
-                bool a = CheckForCollision(ball.transform.position, ball.radius, /*block*/edge);
+                bool a = CheckForCollision(ball.transform.position, ball.radius, edge);
                 if (a)
                 {
+                    Debug.DrawLine(edge.V1, edge.V2, Color.red, 0.5f);
                     break;
                 }
+                Debug.DrawLine(edge.V1, edge.V2, Color.white, 0.5f);
             }
            
         }
@@ -96,12 +58,15 @@ public class CollisionManager : MonoBehaviour
         if ((edge.rotation != Edge.Rotation.Vertical)&&(edge.isRightUp && !LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2))||
             (!edge.isRightUp && LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)))
         {
+            Debug.LogError(edge.V1);
+            Debug.LogError(edge.V2);
             return false;
         }
         if (edge.rotation == Edge.Rotation.Vertical)
         {
             if(pos.x<edge.V1.x&& edge.isRightUp || (pos.x > edge.V1.x && !edge.isRightUp))
             {
+            Debug.Log("B");
                 return false;
             }
         }
@@ -111,18 +76,25 @@ public class CollisionManager : MonoBehaviour
         float p = pos.x;
         float q = pos.y;
 
-        float A = 1 + (a / b) * (a / b);
-        float B = 2 * a * c / (b * b) - 2 * p + a * q / b;
-        float C = p * p + (c / b) * (c / b) + 2 * q * c / b + q * q - r * r;
+        //float A = 1 + (a / b) * (a / b);
+        //float B = 2 * a * c / (b * b) - 2 * p + a * q / b;
+        //float C = p * p + (c / b) * (c / b) + 2 * q * c / b + q * q - r * r;
 
-        float D = B * B - 4 * A * C; // Discriminant
+        //float D = B * B - 4 * A * C; // Discriminant
+        float A = 1 + Mathf.Pow(b/a, 2);
+        float B = 2 * b * c / Mathf.Pow(a, 2) + 2 * b * p / a - 2 * q;
+        float C = Mathf.Pow(c / a, 2) + 2 * p * c / a + Mathf.Pow(p, 2) + Mathf.Pow(q, 2) - Mathf.Pow(r, 2);
+        float D = B * B - 4 * A * C;
+        
         if (D < 0)
         {
-            Debug.Log("Nihuya");
             return false;
         }
-        else /*if (D >= 0)*/
+        else
         {
+            Debug.Log(edge.isRightUp);
+            Debug.Log(LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2));
+            Debug.Log(LinAl.isPointUpperThanLine(pos, edge.V2, edge.V1));
             if (edge.rotation == Edge.Rotation.Horizontal)
             {
                 ball.SetVelocity(new Vector2(ball.Velocity.x, -ball.Velocity.y));
@@ -143,10 +115,13 @@ public class CollisionManager : MonoBehaviour
             }
             else
             {
-                Debug.Log("OOOO");
-                float x = -(B + Mathf.Sqrt(D)) / (2 * A);
-                float y = (x * A + C)/ -B;
-
+                float y = -(B + Mathf.Sqrt(D)) / (2 * A);
+                float x = (y * b + c)/ -a;
+                if ((edge.isRightUp && !LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)) ||
+                    (!edge.isRightUp && LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)))
+                {
+                    return false;
+                }
                 ball.SetVelocity(Reflect(new Vector2(x,y), edge, ball.Velocity));
                 return true;
             }
@@ -156,14 +131,30 @@ public class CollisionManager : MonoBehaviour
     Vector2 Reflect(Vector2 touch, Edge wall, Vector2 velocity)
     {
        
-        float speeed = velocity.magnitude;
+        float speed = velocity.magnitude;
 
-        float k1 = -wall.Line[0] / wall.Line[1];
-        float WallAngle = Mathf.Atan(k1) * Mathf.Rad2Deg;
-        float VelocityAngle = Mathf.Atan2(velocity.y,velocity.x) * Mathf.Rad2Deg;
-        float newVelocityAngle = 2 * WallAngle - VelocityAngle;
+        float[] normal = LinAl.GetPerpendicularLine(touch, wall.Line);
 
-        velocity = new Vector2(Mathf.Tan(Mathf.Deg2Rad * newVelocityAngle), 1f).normalized * speeed;
-        return velocity;
+        float angleWall =  Mathf.Atan(-wall.Line[0] / wall.Line[1])*Mathf.Rad2Deg;
+        Debug.Log($"angleWall градусы : {angleWall}");
+        
+        float angleVelocity = Mathf.Rad2Deg * Mathf.Atan2(velocity.y,velocity.x);
+        Debug.Log($"angleVelocity : {angleVelocity}");
+        //if (wall.isRightUp)
+        //{
+        //    return false;
+        //}
+        if ((wall.isRightUp && LinAl.isPointUpperThanLine(ball.transform.position, wall.V1,wall.V2)) ||(!wall.isRightUp && !LinAl.isPointUpperThanLine(ball.transform.position, wall.V1, wall.V2)))
+        {
+        float newAngleVelocity = 2 * angleWall - angleVelocity;
+        Debug.Log($"new : {newAngleVelocity}");
+        newAngleVelocity *= Mathf.Deg2Rad;
+        return new Vector2(Mathf.Cos(newAngleVelocity), Mathf.Sin(newAngleVelocity)).normalized * speed;
+        }
+        else
+        {
+            Debug.Log("HUETA KAKAYA-TO");
+            return Vector2.zero;
+        }
     }
 }
