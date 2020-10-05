@@ -7,42 +7,35 @@ public class CollisionManager : MonoBehaviour
 {
     [SerializeField]
     Ball ball;
-    List<Block> blocks;
+    public List<Block> blocks { get; private set; }
+    public event Action<Block> Collision;
+    bool hasDestroyedABlock;
     public void SetBlocks(List<Block> blocks)
     {
         this.blocks = blocks;
+        if (this.blocks == null || this.blocks.Count == 0)
+        {
+            this.blocks = new List<Block>();
+        }
+        blocks.Add(FindObjectOfType<Platform>().Block);
     }
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.color = Color.yellow;
-    //    foreach (Block block in blocks)
-    //    {
-    //        foreach (Vector2 vert in block.verts)
-    //        {
-    //            Gizmos.DrawSphere(new Vector3(vert.x, vert.y, 0f), 0.05f);
-    //        }
-    //        for (int i = 0; i < block.verts.Length; i++)
-    //        {
-    //            Gizmos.DrawLine(new Vector3(block.verts[i % 4].x, block.verts[i % 4].y, 0f),
-    //                new Vector3(block.verts[(i + 1) % 4].x, block.verts[(i + 1) % 4].y, 0f));
-    //        }
-    //    }
-    //}
+   
     void FixedUpdate()
     {
-        foreach (Block block in blocks)
+        hasDestroyedABlock = false;
+        for (int i = 0; i < blocks.Count; i++)
         {
-            foreach (Edge edge in block.edges)
+            foreach (Edge edge in blocks[i].edges)
             {
                 bool a = CheckForCollision(ball.transform.position, ball.radius, edge);
                 if (a)
                 {
-                    Debug.DrawLine(edge.V1, edge.V2, Color.red, 0.5f);
+                    if (!hasDestroyedABlock)
+                        Collision(blocks[i]);
+                    hasDestroyedABlock = true;
                     break;
                 }
-                Debug.DrawLine(edge.V1, edge.V2, Color.white, 0.5f);
             }
-           
         }
     }
     
@@ -58,15 +51,12 @@ public class CollisionManager : MonoBehaviour
         if ((edge.rotation != Edge.Rotation.Vertical)&&(edge.isRightUp && !LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2))||
             (!edge.isRightUp && LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2)))
         {
-            Debug.LogError(edge.V1);
-            Debug.LogError(edge.V2);
             return false;
         }
         if (edge.rotation == Edge.Rotation.Vertical)
         {
             if(pos.x<edge.V1.x&& edge.isRightUp || (pos.x > edge.V1.x && !edge.isRightUp))
             {
-            Debug.Log("B");
                 return false;
             }
         }
@@ -92,9 +82,6 @@ public class CollisionManager : MonoBehaviour
         }
         else
         {
-            Debug.Log(edge.isRightUp);
-            Debug.Log(LinAl.isPointUpperThanLine(pos, edge.V1, edge.V2));
-            Debug.Log(LinAl.isPointUpperThanLine(pos, edge.V2, edge.V1));
             if (edge.rotation == Edge.Rotation.Horizontal)
             {
                 ball.SetVelocity(new Vector2(ball.Velocity.x, -ball.Velocity.y));
@@ -128,7 +115,7 @@ public class CollisionManager : MonoBehaviour
                 }
                 ball.SetVelocity(Reflect(new Vector2(x,y), edge, ball.Velocity));
 
-                ball.transform.position = new Vector2(x, y) + LinAl.GetNormalToEdge(edge)/* ball.Velocity.normalized */* (r + 0.001f);
+                ball.transform.position = new Vector2(x, y) + LinAl.GetNormalToEdge(edge) * (r + 0.001f);
                 return true;
             }
         }
@@ -142,24 +129,16 @@ public class CollisionManager : MonoBehaviour
         float[] normal = LinAl.GetPerpendicularLine(touch, wall.Line);
 
         float angleWall =  Mathf.Atan(-wall.Line[0] / wall.Line[1])*Mathf.Rad2Deg;
-        Debug.Log($"angleWall градусы : {angleWall}");
         
         float angleVelocity = Mathf.Rad2Deg * Mathf.Atan2(velocity.y,velocity.x);
-        Debug.Log($"angleVelocity : {angleVelocity}");
-        //if (wall.isRightUp)
-        //{
-        //    return false;
-        //}
         if ((wall.isRightUp && LinAl.isPointUpperThanLine(ball.transform.position, wall.V1,wall.V2)) ||(!wall.isRightUp && !LinAl.isPointUpperThanLine(ball.transform.position, wall.V1, wall.V2)))
         {
         float newAngleVelocity = 2 * angleWall - angleVelocity;
-        Debug.Log($"new : {newAngleVelocity}");
         newAngleVelocity *= Mathf.Deg2Rad;
         return new Vector2(Mathf.Cos(newAngleVelocity), Mathf.Sin(newAngleVelocity)).normalized * speed;
         }
         else
         {
-            Debug.Log("HUETA KAKAYA-TO");
             return Vector2.zero;
         }
     }

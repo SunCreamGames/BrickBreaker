@@ -2,20 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BreakableBrick : Block, IBreakable
+public class BreakableBrick : NormalBlock, IBreakable
 {
+    CollisionManager collManager = GameObject.FindObjectOfType<CollisionManager>();
     public void Break()
     {
-        
+        GameObject.Destroy(spriteBlock);
+        collManager.blocks.Remove(this);
+        collManager.Collision -= BlockCollision;
     }
-    void Start()
+    public BreakableBrick(float w, float h, float rot, Vector2 pos, GameObject block, Color color) : base(w, h, rot, pos, block, color)
     {
-        
+        collManager.Collision += BlockCollision;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void BlockCollision(Block obj)
     {
-        
+        if(obj == this)
+        {
+            Break();
+        }
     }
 }
