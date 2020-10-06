@@ -4,22 +4,17 @@ using UnityEngine;
 
 public abstract class Block
 {
-    protected float w, h, rotation;
+    protected float w, h;
     public Vector2 pos;
     public Vector2[] verts;
     public Edge[] edges;
-    public virtual Vector2[] SetVerticies()
+    public virtual void SetVerticies(Vector2 pos, float rot)
     {
-        return null;
+
     }
-    public virtual Edge[] SetEdges()
+    public virtual void SetEdges()
     {
-        return null;
+        
     }
-  
-    public virtual void GetReflectData(out LinAl.Reflect reflect, out Vector2 pointOfReflect, Vector2 pos, Vector2 prevPos)
-    {
-        reflect = LinAl.Reflect.Diagonal;
-        pointOfReflect = Vector2.zero;
-    }
+    
 }
