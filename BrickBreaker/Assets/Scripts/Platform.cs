@@ -12,8 +12,9 @@ public class Platform : MonoBehaviour
     public NormalBlock Block { private set; get; }
     private void Awake()
     {
-        Block = new NormalBlock(transform.localScale.x,transform.localScale.y, 0f, transform.position, null);
+        Block = new NormalBlock(transform.localScale.x, transform.localScale.y, 0f, transform.position, null, Color.cyan);
         GameObject visualPart = Instantiate(visualBlock, transform);
+        visualPart.GetComponent<SpriteRenderer>().color = new Color(0.749f, 0.2f, 0.188f, 1f);
     }
     private void FixedUpdate()
     {
